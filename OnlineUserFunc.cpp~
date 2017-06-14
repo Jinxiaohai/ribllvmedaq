@@ -1,0 +1,637 @@
+////////////////////////////////////////////////
+// Some Userdefined functions used for 
+// Online program.
+// Han Jianlong (08/2012)
+////////////////////////////////////////////////
+
+#include <iostream>
+using namespace std;
+
+#include "TROOT.h"
+#include "TH1.h"
+#include "TH1F.h"
+#include "TH2F.h"
+#include "TFile.h"
+#include "TF1.h"
+#include "TList.h"
+#include "TOnlineFrame.h"
+#include "TOnline.h"
+
+void def_TH1F(int hid, const char *hname, int bins, float xmin, float xmax);
+void hfill1(int hid, float value, float weight);
+void def_TH2F(int hid, const char *hname, int xbins, float xmin, float xmax, int ybins, float ymin, float ymax);
+void hfill2(int hid, float x, float y, float weight);
+extern int  GetRawData(int Crate, int Geo, int channel);
+extern void HBOOK1(int id, const char *title, int nxbin, float xlow, float xup, float vmx);
+extern void HBOOK2(int id, const char *title, int nxbin, float xlow, float xup, int nybin, float ylow, float yup, float vmx);
+extern void HF1(int id, float x, float weight);
+extern void HF2(int id, float x, float y, float weight);
+extern bool HEXIST(int ihist);
+
+
+void UserTH_Init()
+{
+	//For safety, use only 'def_TH1F()' and 'def_TH2F()' in this function
+	//def_TH1F(1000, "T2-T1",    4000, -200.5, 2800.5);
+	def_TH1F(1001, "T2-T1", 200, -50., 150.);
+	def_TH1F(1002, "tofcal", 400, 0., 400.);
+	def_TH1F(1003, "dE", 4000, 0.5, 4000.5);
+	def_TH1F(1004, "dEcal", 200, 0.5, 80.5);
+	def_TH2F(1005, "Tof-dE", 400, -50., 150., 300, 0, 1200.);
+	def_TH2F(1006, "Tofcal_dEcal", 400, 100, 500, 300, 0.5, 300.5);	
+    def_TH2F(1007, "IC1-DSSD1", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1008, "IC2-DSSD2", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1009, "IC3-DSSD3", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1010, "IC4-DSSD4", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1011, "IC5-DSSD5", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1012, "IC6-DSSD6", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1013, "IC7-DSSD7", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1014, "IC8-DSSD8", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1015, "IC9-DSSD9", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1016, "IC10-DSSD10", 4096, 0, 4095, 4096, 0, 4095.);
+    
+    def_TH2F(1017, "qsd300_1-qsd1000_1", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1018, "qsd300_2-qsd1000_2", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1019, "qsd300_3-qsd1000_3", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1020, "qsd300_4-qsd1000_4", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1021, "qsd300_5-qsd1000_5", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1022, "qsd300_6-qsd1000_6", 4096, 0, 4095, 4096, 0, 4095.);        
+    def_TH2F(1023, "qsd300_7-qsd1000_7", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1024, "qsd300_8-qsd1000_8", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1025, "qsd300_9-qsd1000_9", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1026, "qsd300_10-qsd1000_10", 4096, 0, 4095, 4096, 0, 4095.);  
+    
+    def_TH2F(1027, "dssd1ten-qsd300_1", 4096, 0, 4095, 4096, 0, 4095.); 
+    def_TH2F(1028, "dssd2ten-qsd300_2", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1029, "dssd3ten-qsd300_3", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1030, "dssd4ten-qsd300_4", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1031, "dssd5ten-qsd300_5", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1032, "dssd6ten-qsd300_6", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1033, "dssd7ten-qsd300_7", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1034, "dssd8ten-qsd300_8", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1035, "dssd9ten-qsd300_9", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1036, "dssd10ten-qsd300_10", 4096, 0, 4095, 4096, 0, 4095.);
+    def_TH2F(1037, "p1xy",120,-60, 60, 120, -60, 60);
+    def_TH2F(1038, "p2xy",120,-60, 60, 120, -60, 60); 
+    def_TH2F(1042, "p3xy",120,-60, 60, 120, -60, 60);
+    def_TH2F(1043, "p4xy",120,-60, 60, 120, -60, 60);   
+    def_TH2F(1039, "dssd1all-qsd300_1", 4096, 0, 4095, 4096, 0, 4095.);  
+    def_TH2F(1040, "dssd10all-qsd300_10", 4096, 0, 4095, 4096, 0, 4095.); 
+    def_TH2F(1041, "dssd1-dssd1", 4096, 0, 4095, 4096, 0, 4095.);  
+    def_TH2F(1050, "dE-E", 496, 0, 4095, 496, 0, 4095.);  
+    
+    def_TH2F(1051, "p1xy_13O",120,-60, 60, 120, -60, 60);
+    def_TH2F(1052, "p2xy_13O",120,-60, 60, 120, -60, 60);
+    def_TH2F(1053, "p3xy_13O",120,-60, 60, 120, -60, 60);
+    def_TH2F(1054, "p4xy_13O",120,-60, 60, 120, -60, 60);
+    
+    
+    
+    def_TH2F(1055, "p1xy_10Be",120,-60, 60, 120, -60, 60);
+    def_TH2F(1056, "p2xy_10Be",120,-60, 60, 120, -60, 60);
+    def_TH2F(1057, "p4xy_10Be",120,-60, 60, 120, -60, 60);
+    
+    
+}
+
+void UserTH_Fill() 
+{
+	//GetRawData(Crate, Geo, channel), channel:[0, ..]
+	int T1 = GetRawData(1, 16, 0);
+	int T2 = GetRawData(1, 16, 1);
+	
+	
+	int IC1=GetRawData(1, 13, 16);
+	int IC2=GetRawData(1, 13, 17);
+	int IC3=GetRawData(1, 13, 18);
+	int IC4=GetRawData(1, 13, 19);
+	int IC5=GetRawData(1, 13, 20);
+	int IC6=GetRawData(1, 13, 21);		
+	int IC7=GetRawData(1, 13, 22);
+	int IC8=GetRawData(1, 13, 23);
+	int IC9=GetRawData(1, 13, 24);
+	int IC10=GetRawData(1, 13, 25);
+			
+	int dssd1_x8=GetRawData(1, 3, 16);
+	int dssd1_x7=GetRawData(1, 3, 17);
+	int dssd1_x6=GetRawData(1, 3, 18);
+	int dssd1_x5=GetRawData(1, 3, 19);
+	int dssd1_x4=GetRawData(1, 3, 20);
+	int dssd1_x3=GetRawData(1, 3, 21);
+	int dssd1_x2=GetRawData(1, 3, 22);
+	int dssd1_x1=GetRawData(1, 3, 23);
+	int dssd1_y4=GetRawData(1, 3, 7);	
+	///dssd2///
+	int dssd2_x4=GetRawData(1, 3, 28);
+	int dssd2_y4=GetRawData(1, 3, 12);	
+	///dssd3-4///
+	int dssd3_x4=GetRawData(1, 5, 20);
+	int dssd3_y4=GetRawData(1, 5, 4);
+
+	int dssd4_x4=GetRawData(1, 5, 28);
+	int dssd4_y4=GetRawData(1, 5, 12);
+	///dssd5-6///
+	int dssd5_x4=GetRawData(1, 7, 20);
+	int dssd5_y4=GetRawData(1, 7, 7);
+
+	int dssd6_x4=GetRawData(1, 7, 28);
+	int dssd6_y4=GetRawData(1, 7, 12);
+	///dssd7-8///
+	int dssd7_x4=GetRawData(1, 9, 20);
+	int dssd7_y4=GetRawData(1, 9, 7);
+
+	int dssd8_x4=GetRawData(1, 9, 28);
+	int dssd8_y4=GetRawData(1, 9, 15);	
+
+	///dssd9-10///
+	int dssd9_x4=GetRawData(1, 11, 20);
+	int dssd9_y4=GetRawData(1, 11, 4);
+
+	//int dssd10_x4=GetRawData(1, 11, 28);
+	int dssd10_y4=GetRawData(1, 11, 12);
+	
+	int dssd10_x8=GetRawData(1, 11, 24);
+	int dssd10_x7=GetRawData(1, 11, 25);
+	int dssd10_x6=GetRawData(1, 11, 26);
+	int dssd10_x5=GetRawData(1, 11, 27);
+	int dssd10_x4=GetRawData(1, 11, 28);
+	int dssd10_x3=GetRawData(1, 11, 29);
+	int dssd10_x2=GetRawData(1, 11, 30);
+	int dssd10_x1=GetRawData(1, 11, 31);
+		
+	///qsd300_1///
+	int qsd300_1_1=GetRawData(1, 14, 28);
+	int qsd300_1_2=GetRawData(1, 14, 29);
+	int qsd300_1_3=GetRawData(1, 14, 30);
+	int qsd300_1_4=GetRawData(1, 14, 31);	
+	
+		///qsd300_2///
+	int qsd300_2_1=GetRawData(1, 14, 24);
+	int qsd300_2_2=GetRawData(1, 14, 25);
+	int qsd300_2_3=GetRawData(1, 14, 27);
+	int qsd300_2_4=GetRawData(1, 14, 28);	
+	
+		///qsd300_3///
+	int qsd300_3_1=GetRawData(1, 14, 20);
+	int qsd300_3_2=GetRawData(1, 14, 21);
+	int qsd300_3_3=GetRawData(1, 14, 22);
+	int qsd300_3_4=GetRawData(1, 14, 23);	
+	
+		///qsd300_4///
+	int qsd300_4_1=GetRawData(1, 14, 16);
+	int qsd300_4_2=GetRawData(1, 14, 17);
+	int qsd300_4_3=GetRawData(1, 14, 18);
+	int qsd300_4_4=GetRawData(1, 14, 19);	
+	
+		///qsd300_5///
+	int qsd300_5_1=GetRawData(1, 14, 12);
+	int qsd300_5_2=GetRawData(1, 14, 13);
+	int qsd300_5_3=GetRawData(1, 14, 14);
+	int qsd300_5_4=GetRawData(1, 14, 15);	
+	
+		///qsd300_6///
+	int qsd300_6_1=GetRawData(1, 14, 8);
+	int qsd300_6_2=GetRawData(1, 14, 9);
+	int qsd300_6_3=GetRawData(1, 14, 10);
+	int qsd300_6_4=GetRawData(1, 14, 11);	
+	
+		///qsd300_7///
+	int qsd300_7_1=GetRawData(1, 14, 4);
+	int qsd300_7_2=GetRawData(1, 14, 5);
+	int qsd300_7_3=GetRawData(1, 14, 6);
+	int qsd300_7_4=GetRawData(1, 14, 7);	
+	
+		///qsd300_8///
+	int qsd300_8_1=GetRawData(1, 14, 0);
+	int qsd300_8_2=GetRawData(1, 14, 1);
+	int qsd300_8_3=GetRawData(1, 14, 2);
+	int qsd300_8_4=GetRawData(1, 14, 3);	
+	
+		///qsd300_9///
+	int qsd300_9_1=GetRawData(1, 15, 20);
+	int qsd300_9_2=GetRawData(1, 15, 21);
+	int qsd300_9_3=GetRawData(1, 15, 22);
+	int qsd300_9_4=GetRawData(1, 15, 23);	
+	
+		///qsd300_10///
+	int qsd300_10_1=GetRawData(1, 15, 16);
+	int qsd300_10_2=GetRawData(1, 15, 17);
+	int qsd300_10_3=GetRawData(1, 15, 18);
+	int qsd300_10_4=GetRawData(1, 15, 19);	
+	
+	///qsd1000-series///
+	int qsd1000_1=GetRawData(1, 13, 0);
+	int qsd1000_2=GetRawData(1, 13, 1);
+	int qsd1000_3=GetRawData(1, 13, 2);
+	int qsd1000_4=GetRawData(1, 13, 3);
+	int qsd1000_5=GetRawData(1, 13, 4);
+	int qsd1000_6=GetRawData(1, 13, 5);
+	int qsd1000_7=GetRawData(1, 13, 6);
+	int qsd1000_8=GetRawData(1, 13, 7);
+	int qsd1000_9=GetRawData(1, 13, 8);
+	int qsd1000_10=GetRawData(1, 13, 9);	
+						
+		///dssd1ten-series///				
+	int dssd1ten_x8=GetRawData(1, 4, 16);
+	int dssd1ten_x7=GetRawData(1, 4, 17);
+	int dssd1ten_x6=GetRawData(1, 4, 18);
+	int dssd1ten_x5=GetRawData(1, 4, 19);
+	int dssd1ten_x4=GetRawData(1, 4, 20);
+	int dssd1ten_x3=GetRawData(1, 4, 21);
+	int dssd1ten_x2=GetRawData(1, 4, 22);
+	int dssd1ten_x1=GetRawData(1, 4, 23);
+
+		///dssd2ten-series///				
+	int dssd2ten_x8=GetRawData(1, 4, 24);
+	int dssd2ten_x7=GetRawData(1, 4, 25);
+	int dssd2ten_x6=GetRawData(1, 4, 26);
+	int dssd2ten_x5=GetRawData(1, 4, 27);
+	int dssd2ten_x4=GetRawData(1, 4, 28);
+	int dssd2ten_x3=GetRawData(1, 4, 29);
+	int dssd2ten_x2=GetRawData(1, 4, 30);
+	int dssd2ten_x1=GetRawData(1, 4, 31);
+	
+	///dssd3ten-series///				
+	int dssd3ten_x8=GetRawData(1, 6, 16);
+	int dssd3ten_x7=GetRawData(1, 6, 17);
+	int dssd3ten_x6=GetRawData(1, 6, 18);
+	int dssd3ten_x5=GetRawData(1, 6, 19);
+	int dssd3ten_x4=GetRawData(1, 6, 20);
+	int dssd3ten_x3=GetRawData(1, 6, 21);
+	int dssd3ten_x2=GetRawData(1, 6, 22);
+	int dssd3ten_x1=GetRawData(1, 6, 23);
+
+		///dssd4ten-series///				
+	int dssd4ten_x8=GetRawData(1, 6, 24);
+	int dssd4ten_x7=GetRawData(1, 6, 25);
+	int dssd4ten_x6=GetRawData(1, 6, 26);
+	int dssd4ten_x5=GetRawData(1, 6, 27);
+	int dssd4ten_x4=GetRawData(1, 6, 28);
+	int dssd4ten_x3=GetRawData(1, 6, 29);
+	int dssd4ten_x2=GetRawData(1, 6, 30);
+	int dssd4ten_x1=GetRawData(1, 6, 31);
+	
+		///dssd5ten-series///				
+	int dssd5ten_x8=GetRawData(1, 8, 16);
+	int dssd5ten_x7=GetRawData(1, 8, 17);
+	int dssd5ten_x6=GetRawData(1, 8, 18);
+	int dssd5ten_x5=GetRawData(1, 8, 19);
+	int dssd5ten_x4=GetRawData(1, 8, 20);
+	int dssd5ten_x3=GetRawData(1, 8, 21);
+	int dssd5ten_x2=GetRawData(1, 8, 22);
+	int dssd5ten_x1=GetRawData(1, 8, 23);
+
+		///dssd6ten-series///				
+	int dssd6ten_x8=GetRawData(1, 8, 24);
+	int dssd6ten_x7=GetRawData(1, 8, 25);
+	int dssd6ten_x6=GetRawData(1, 8, 26);
+	int dssd6ten_x5=GetRawData(1, 8, 27);
+	int dssd6ten_x4=GetRawData(1, 8, 28);
+	int dssd6ten_x3=GetRawData(1, 8, 29);
+	int dssd6ten_x2=GetRawData(1, 8, 30);
+	int dssd6ten_x1=GetRawData(1, 8, 31);
+	
+	///dssd7ten-series///				
+	int dssd7ten_x8=GetRawData(1, 10, 16);
+	int dssd7ten_x7=GetRawData(1, 10, 17);
+	int dssd7ten_x6=GetRawData(1, 10, 18);
+	int dssd7ten_x5=GetRawData(1, 10, 19);
+	int dssd7ten_x4=GetRawData(1, 10, 20);
+	int dssd7ten_x3=GetRawData(1, 10, 21);
+	int dssd7ten_x2=GetRawData(1, 10, 22);
+	int dssd7ten_x1=GetRawData(1, 10, 23);
+
+		///dssd8ten-series///				
+	int dssd8ten_x8=GetRawData(1, 10, 24);
+	int dssd8ten_x7=GetRawData(1, 10, 25);
+	int dssd8ten_x6=GetRawData(1, 10, 26);
+	int dssd8ten_x5=GetRawData(1, 10, 27);
+	int dssd8ten_x4=GetRawData(1, 10, 28);
+	int dssd8ten_x3=GetRawData(1, 10, 29);
+	int dssd8ten_x2=GetRawData(1, 10, 30);
+	int dssd8ten_x1=GetRawData(1, 10, 31);
+	
+	///dssd9ten-series///				
+	int dssd9ten_x8=GetRawData(1, 12, 16);
+	int dssd9ten_x7=GetRawData(1, 12, 17);
+	int dssd9ten_x6=GetRawData(1, 12, 18);
+	int dssd9ten_x5=GetRawData(1, 12, 19);
+	int dssd9ten_x4=GetRawData(1, 12, 20);
+	int dssd9ten_x3=GetRawData(1, 12, 21);
+	int dssd9ten_x2=GetRawData(1, 12, 22);
+	int dssd9ten_x1=GetRawData(1, 12, 23);
+
+		///dssd10ten-series///				
+	int dssd10ten_x8=GetRawData(1, 12, 24);
+	int dssd10ten_x7=GetRawData(1, 12, 25);
+	int dssd10ten_x6=GetRawData(1, 12, 26);
+	int dssd10ten_x5=GetRawData(1, 12, 27);
+	int dssd10ten_x4=GetRawData(1, 12, 28);
+	int dssd10ten_x3=GetRawData(1, 12, 29);
+	int dssd10ten_x2=GetRawData(1, 12, 30);
+	int dssd10ten_x1=GetRawData(1, 12, 31);
+	
+	int p1t=GetRawData(1, 19, 0);
+	int p1x1=GetRawData(1, 18, 0);
+	int p1x2=GetRawData(1, 18, 1);
+	int p1y1=GetRawData(1, 18, 2);
+	int p1y2=GetRawData(1, 18, 3);
+	float p1x=-59;
+	float p1y=-59;
+	if(p1x1>100&&p1x1<4000&&p1x2>100&&p1x2<4000) p1x=(p1x1-p1x2)/40.0;
+	if(p1y1>100&&p1y1<4000&&p1y2>100&&p1y2<4000) p1y=(p1y1-p1y2)/40.0;
+	
+	int p2t=GetRawData(1, 19, 1);
+	int p2x1=GetRawData(1, 18, 4);
+	int p2x2=GetRawData(1, 18, 5);
+	int p2y1=GetRawData(1, 18, 6);
+	int p2y2=GetRawData(1, 18, 7);
+	float p2x=-59;
+	float p2y=-59;
+	if(p2x1>100&&p2x1<4000&&p2x2>100&&p2x2<4000) p2x=(p2x1-p2x2)/40.0;
+	if(p2y1>100&&p2y1<4000&&p2y2>100&&p2y2<4000) p2y=(p2y1-p2y2)/40.0;
+	
+	int p3t=GetRawData(1, 19, 2);
+	int p3x1=GetRawData(1, 18, 8);
+	int p3x2=GetRawData(1, 18, 9);
+	int p3y1=GetRawData(1, 18, 10);
+	int p3y2=GetRawData(1, 18, 11);
+	float p3x=-59;
+	float p3y=-59;
+	if(p3x1>100&&p3x1<4000&&p3x2>100&&p3x2<4000) p3x=(p3x1-p3x2)/40.0;
+	if(p3y1>100&&p3y1<4000&&p3y2>100&&p3y2<4000) p3y=(p3y1-p3y2)/40.0;
+	
+	int p4t=GetRawData(1, 19, 3);
+	int p4x1=GetRawData(1, 18, 12);
+	int p4x2=GetRawData(1, 18, 13);
+	int p4y1=GetRawData(1, 18, 14);
+	int p4y2=GetRawData(1, 18, 15);
+	float p4x=-59;
+	float p4y=-59;
+	if(p4x1>100&&p4x1<4000&&p4x2>100&&p4x2<4000) p4x=(p4x1-p4x2)/40.0;
+	if(p4y1>100&&p4y1<4000&&p4y2>100&&p4y2<4000) p4y=(p4y1-p4y2)/40.0;
+	
+	//int dE=GetRawData(1, 14, 0); // 2016.04.15 by ma
+	int E=GetRawData(1, 10, 20);
+	
+	
+	
+	float dssd1= 0.;
+	float dssd2= 0.;
+	float dssd3= 0.;
+	float dssd4= 0.;
+	float dssd5= 0.;
+	float dssd6= 0.;
+	float dssd7= 0.;
+	float dssd8= 0.;
+	float dssd9= 0.;
+	float dssd10= 0.;
+	float dssd1all=0.;
+	float dssd10all=0.;
+	
+	float dssd1ten= 0.;
+	float dssd2ten= 0.;
+	float dssd3ten= 0.;
+	float dssd4ten= 0.;
+	float dssd5ten= 0.;
+	float dssd6ten= 0.;
+	float dssd7ten= 0.;
+	float dssd8ten= 0.;
+	float dssd9ten= 0.;
+	float dssd10ten= 0.;	
+	
+	float qsd300_1= 0.;	
+	float qsd300_2= 0.;	
+	float qsd300_3= 0.;	
+	float qsd300_4= 0.;	
+	float qsd300_5= 0.;	
+	float qsd300_6= 0.;	
+	float qsd300_7= 0.;	
+	float qsd300_8= 0.;	
+	float qsd300_9= 0.;	
+	float qsd300_10= 0.;	
+
+	//////////////////
+	if(dssd1_x4>10.&&dssd1_x5>10.)
+	hfill2(1041, dssd1_x4, dssd1_x5, 1);
+    
+    
+    //qsd300 series////
+	if(qsd300_1_1>10.||qsd300_1_2>10.||qsd300_1_3>10.||qsd300_1_4>10.)
+	qsd300_1=qsd300_1_1+qsd300_1_2+qsd300_1_3+qsd300_1_4;
+	hfill2(1017, qsd1000_1, qsd300_1, 1);
+	
+	if(qsd300_2_1>10.||qsd300_2_2>10.||qsd300_2_3>10.||qsd300_2_4>10.)
+	qsd300_2=qsd300_2_1+qsd300_2_2+qsd300_2_3+qsd300_2_4;
+	hfill2(1018, qsd1000_2, qsd300_2, 1);
+	
+	if(qsd300_3_1>10.||qsd300_3_2>10.||qsd300_3_3>10.||qsd300_3_4>10.)
+	qsd300_3=qsd300_3_1+qsd300_3_2+qsd300_3_3+qsd300_3_4;
+	hfill2(1019, qsd1000_3, qsd300_3, 1);
+	
+	if(qsd300_4_1>10.||qsd300_4_2>10.||qsd300_4_3>10.||qsd300_4_4>10.)
+	qsd300_4=qsd300_4_1+qsd300_4_2+qsd300_4_3+qsd300_4_4;
+	hfill2(1020, qsd1000_4, qsd300_4, 1);
+	
+	if(qsd300_5_1>10.||qsd300_5_2>10.||qsd300_5_3>10.||qsd300_5_4>10.)
+	qsd300_5=qsd300_5_1+qsd300_5_2+qsd300_5_3+qsd300_5_4;
+	hfill2(1021, qsd1000_5, qsd300_5, 1);
+	
+	if(qsd300_6_1>10.||qsd300_6_2>10.||qsd300_6_3>10.||qsd300_6_4>10.)
+	qsd300_6=qsd300_6_1+qsd300_6_2+qsd300_6_3+qsd300_6_4;
+	hfill2(1022, qsd1000_6, qsd300_6, 1);
+	
+	if(qsd300_7_1>10.||qsd300_7_2>10.||qsd300_7_3>10.||qsd300_7_4>10.)
+	qsd300_7=qsd300_7_1+qsd300_7_2+qsd300_7_3+qsd300_7_4;
+	hfill2(1023, qsd1000_7, qsd300_7, 1);
+	
+	if(qsd300_8_1>10.||qsd300_8_2>10.||qsd300_8_3>10.||qsd300_8_4>10.)
+	qsd300_8=qsd300_8_1+qsd300_8_2+qsd300_8_3+qsd300_8_4;
+	hfill2(1024, qsd1000_8, qsd300_8, 1);
+	
+	if(qsd300_9_1>10.||qsd300_9_2>10.||qsd300_9_3>10.||qsd300_9_4>10.)
+	qsd300_9=qsd300_9_1+qsd300_9_2+qsd300_9_3+qsd300_9_4;
+	hfill2(1025, qsd1000_9, qsd300_9, 1);
+	
+	if(qsd300_10_1>10.||qsd300_10_2>10.||qsd300_10_3>10.||qsd300_10_4>10.)
+	qsd300_10=qsd300_10_1+qsd300_10_2+qsd300_10_3+qsd300_10_4;
+	hfill2(1026, qsd1000_10, qsd300_10, 1);
+	
+	/////////////////////////////////////////////
+	
+	    //dssdten%qsd300 series////
+	if(dssd1ten_x1>0.||dssd1ten_x2>0.||dssd1ten_x3>0.||dssd1ten_x4>0.||dssd1ten_x5>0.||dssd1ten_x6>0.||dssd1ten_x7>0.||dssd1ten_x8>0.)
+	dssd1ten=dssd1ten_x1+dssd1ten_x2+dssd1ten_x3+dssd1ten_x4+dssd1ten_x5+dssd1ten_x6+dssd1ten_x7+dssd1ten_x8;
+	hfill2(1027, qsd300_1, dssd1ten, 1);	
+	
+	if(dssd2ten_x1>0.||dssd2ten_x2>0.||dssd2ten_x3>0.||dssd2ten_x4>0.||dssd2ten_x5>0.||dssd2ten_x6>0.||dssd2ten_x7>0.||dssd2ten_x8>0.)
+	dssd2ten=dssd2ten_x1+dssd2ten_x2+dssd2ten_x3+dssd2ten_x4+dssd2ten_x5+dssd2ten_x6+dssd2ten_x7+dssd2ten_x8;
+	hfill2(1028, qsd300_2, dssd2ten, 1);	
+	
+	if(dssd3ten_x1>0.||dssd3ten_x2>0.||dssd3ten_x3>0.||dssd3ten_x4>0.||dssd3ten_x5>0.||dssd3ten_x6>0.||dssd3ten_x7>0.||dssd3ten_x8>0.)
+	dssd3ten=dssd3ten_x1+dssd3ten_x2+dssd3ten_x3+dssd3ten_x4+dssd3ten_x5+dssd3ten_x6+dssd3ten_x7+dssd3ten_x8;
+	hfill2(1029, qsd300_3, dssd3ten, 1);	
+	
+	if(dssd4ten_x1>0.||dssd4ten_x2>0.||dssd4ten_x3>0.||dssd4ten_x4>0.||dssd4ten_x5>0.||dssd4ten_x6>0.||dssd4ten_x7>0.||dssd4ten_x8>0.)
+	dssd4ten=dssd4ten_x1+dssd4ten_x2+dssd4ten_x3+dssd4ten_x4+dssd4ten_x5+dssd4ten_x6+dssd4ten_x7+dssd4ten_x8;
+	hfill2(1030, qsd300_4, dssd4ten, 1);	
+	
+	if(dssd5ten_x1>0.||dssd5ten_x2>0.||dssd5ten_x3>0.||dssd5ten_x4>0.||dssd5ten_x5>0.||dssd5ten_x6>0.||dssd5ten_x7>0.||dssd5ten_x8>0.)
+	dssd5ten=dssd5ten_x1+dssd5ten_x2+dssd5ten_x3+dssd5ten_x4+dssd5ten_x5+dssd5ten_x6+dssd5ten_x7+dssd5ten_x8;
+	hfill2(1031, qsd300_5, dssd5ten, 1);	
+	
+	if(dssd6ten_x1>0.||dssd6ten_x2>0.||dssd6ten_x3>0.||dssd6ten_x4>0.||dssd6ten_x5>0.||dssd6ten_x6>0.||dssd6ten_x7>0.||dssd6ten_x8>0.)
+	dssd6ten=dssd6ten_x1+dssd6ten_x2+dssd6ten_x3+dssd6ten_x4+dssd6ten_x5+dssd6ten_x6+dssd6ten_x7+dssd6ten_x8;
+	hfill2(1032, qsd300_6, dssd6ten, 1);	
+	
+	if(dssd7ten_x1>0.||dssd7ten_x2>0.||dssd7ten_x3>0.||dssd7ten_x4>0.||dssd7ten_x5>0.||dssd7ten_x6>0.||dssd7ten_x7>0.||dssd7ten_x8>0.)
+	dssd7ten=dssd7ten_x1+dssd7ten_x2+dssd7ten_x3+dssd7ten_x4+dssd7ten_x5+dssd7ten_x6+dssd7ten_x7+dssd7ten_x8;
+	hfill2(1033, qsd300_7, dssd7ten, 1);	
+	
+	if(dssd8ten_x1>0.||dssd8ten_x2>0.||dssd8ten_x3>0.||dssd8ten_x4>0.||dssd8ten_x5>0.||dssd8ten_x6>0.||dssd8ten_x7>0.||dssd8ten_x8>0.)
+	dssd8ten=dssd8ten_x1+dssd8ten_x2+dssd8ten_x3+dssd8ten_x4+dssd8ten_x5+dssd8ten_x6+dssd8ten_x7+dssd8ten_x8;
+	hfill2(1034, qsd300_8, dssd8ten, 1);	
+	
+	if(dssd9ten_x1>0.||dssd9ten_x2>0.||dssd9ten_x3>0.||dssd9ten_x4>0.||dssd9ten_x5>0.||dssd9ten_x6>0.||dssd9ten_x7>0.||dssd9ten_x8>0.)
+	dssd9ten=dssd9ten_x1+dssd9ten_x2+dssd9ten_x3+dssd9ten_x4+dssd9ten_x5+dssd9ten_x6+dssd9ten_x7+dssd9ten_x8;
+	hfill2(1035, qsd300_9, dssd9ten, 1);	
+	
+	if(dssd10ten_x1>0.||dssd10ten_x2>0.||dssd10ten_x3>0.||dssd10ten_x4>0.||dssd10ten_x5>0.||dssd10ten_x6>0.||dssd10ten_x7>0.||dssd10ten_x8>0.)
+	dssd10ten=dssd10ten_x1+dssd10ten_x2+dssd10ten_x3+dssd10ten_x4+dssd10ten_x5+dssd10ten_x6+dssd10ten_x7+dssd10ten_x8;
+	hfill2(1036, qsd300_10, dssd10ten, 1);	
+	
+////////////////////////////////////////////////////////////////////////////////	
+	
+	if(dssd1_x1>0.||dssd1_x2>0.||dssd1_x3>0.||dssd1_x4>0.||dssd1_x5>0.||dssd1_x6>0.||dssd1_x7>0.||dssd1_x8>0.||qsd1000_1>10.)
+	dssd1all=dssd1_x1+dssd1_x2+dssd1_x3+dssd1_x4+dssd1_x5+dssd1_x6+dssd1_x7+dssd1_x8;
+	hfill2(1039, qsd300_1, dssd1all, 1);	
+	
+	if(dssd10_x1>0.||dssd10_x2>0.||dssd10_x3>0.||dssd10_x4>0.||dssd10_x5>0.||dssd10_x6>0.||dssd10_x7>0.||dssd10_x8>0.)
+	dssd10all=dssd10_x1+dssd10_x2+dssd10_x3+dssd10_x4+dssd10_x5+dssd10_x6+dssd10_x7+dssd10_x8;
+	hfill2(1040, qsd300_10, dssd10all, 1);
+	
+	if (dssd1_x4>10.&&dssd1_y4>10.) dssd1=dssd1_x4;
+	hfill2(1007, dssd1, IC1, 1);	
+
+	if (dssd2_x4>10.&&dssd2_y4>10.) dssd2=dssd2_x4;
+	hfill2(1008, dssd2, IC2, 1);	
+
+	if (dssd3_x4>10.&&dssd3_y4>10.) dssd3=dssd3_x4;
+	hfill2(1009, dssd3, IC3, 1);	
+
+	if (dssd4_x4>10.&&dssd4_y4>10.) dssd4=dssd4_x4;
+	hfill2(1010, dssd4, IC4, 1);
+	
+	if (dssd5_x4>10.&&dssd5_y4>10.) dssd5=dssd5_x4;
+	hfill2(1011, dssd5, IC5, 1);	
+
+	if (dssd6_x4>10.&&dssd6_y4>10.) dssd6=dssd6_x4;
+	hfill2(1012, dssd6, IC6, 1);
+	
+	if (dssd7_x4>10.&&dssd7_y4>10.) dssd7=dssd7_x4;
+	hfill2(1013, dssd7, IC7, 1);	
+
+	if (dssd8_x4>10.&&dssd8_y4>10.) dssd8=dssd8_x4;
+	hfill2(1014, dssd8, IC8, 1);
+	
+	if (dssd9_x4>10.&&dssd9_y4>10.) dssd9=dssd9_x4;
+	hfill2(1015, dssd9, IC9, 1);	
+
+	if (dssd10_x4>10.&&dssd10_y4>10.) dssd10=dssd10_x4;
+	hfill2(1016, dssd10, IC10, 1);					
+	
+	
+	int t21 = T2-T1;                     hfill1(1001, t21, 1);
+	float tofcal = (T2-T1)*0.025 + 0.0;  hfill1(1002, tofcal, 1);
+	
+	
+	int de = GetRawData(1, 14, 0);       hfill1(1003, de, 1);
+	float decal = de*0.05 + 0.0;         hfill1(1004, decal, 1);
+	
+	
+	hfill2(1005, t21, de, 1);
+	hfill2(1006, tofcal, decal, 1);
+	//if(p1x>-59&&p1y>-59)
+	hfill2(1037, p1x,p1y,1);
+	//if(p2x>-59&&p2y>-59)
+	hfill2(1038, p2x,p2y,1);
+
+	//if(p3x>-59&&p3y>-59)
+	hfill2(1042, p3x,p3y,1);
+	//if(p4x>-59&&p4y>-59)
+	hfill2(1043, p4x,p4y,1);
+	hfill2(1050, de,E,1);
+    
+    if (t21>-310&&t21<-290)  hfill2(1051, p1x,p1y,1);
+    if (t21>-310&&t21<-290)  hfill2(1052, p2x,p2y,1);
+    if (t21>-310&&t21<-290)  hfill2(1054, p4x,p4y,1);
+   
+   
+    if (t21>-105&&t21<-80)  hfill2(1055, p1x,p1y,1);
+    if (t21>-100&&t21<-80)  hfill2(1056, p2x,p2y,1);
+    if (t21>-100&&t21<-80)  hfill2(1057, p4x,p4y,1);
+    
+     
+
+}
+
+void OnlineUserFunction(TOnlineFrame *onl)
+{
+	//TF1 *func1 = new TF1("func1","sqrt(-x*x-10*x)-5" , -10, 0);
+	//TF1 *func2 = new TF1("func1","-sqrt(-x*x-10*x)-5", -10, 0);
+
+	//if(onl->datafile->Get("h272") )
+	//{
+	//	TList *thfunclist = ( (TH1*)(onl->datafile->Get("h272") ) )->GetListOfFunctions();
+	//	if(thfunclist)
+	//	{
+	//		thfunclist->Add(func1);
+	//		thfunclist->Add(func2);
+	//	}
+	//}
+
+}
+
+//capsulize of 'TH1F()', for safety
+void def_TH1F(int hid, const char *hname, int bins, float xmin, float xmax)
+{
+	if( HEXIST(hid) )
+	{
+		cout << "Histogram ID: " << hid << " (mod_id*100+ch_num) already exist." << endl;
+		return;
+	}
+	else
+	{
+		char name[30];
+		strncpy(name, hname, sizeof(name));
+		HBOOK1(hid, name, bins, xmin, xmax, 0.);
+	}
+}
+
+//capsulize of 'TH2F()', for safety
+void def_TH2F(int hid, const char *hname, int xbins, float xmin, float xmax, int ybins, float ymin, float ymax)
+{
+	if( HEXIST(hid) )
+	{
+		cout << "Histogram ID: " << hid << " (mod_id*100+ch_num) already exist. " << endl;
+		return;
+	}
+	else
+	{
+		char name[30];
+		strncpy(name, hname, sizeof(name));
+		HBOOK2(hid, name, xbins, xmin, xmax, ybins, ymin, ymax, 0.);
+	}
+}
+
+//capsulize of 'TH1F::Fill(....)', for safety
+void hfill1(int hid, float value, float weight=1.)
+{
+	if(HEXIST(hid)) HF1(hid, value, weight);
+}
+
+//capsulize of 'TH2F::Fill(....)', for safety
+void hfill2(int hid, float x, float y, float weight = 1.)
+{
+	if(HEXIST(hid)) HF2(hid, x, y, weight);
+}

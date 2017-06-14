@@ -1,0 +1,186 @@
+///////////////////////////////////////////////
+// An Raw2ROOT.cpp: main() of Raw2ROOT, used
+// for offline data analysis.
+// Xingquan Liu Modified (04/2015)
+///////////////////////////////////////////////
+
+#include "TApplication.h"
+#include "TDAQApplication.h"
+#include "TConfig.h"
+#include "TDataFileReader.h"
+#include "TDataAnalyser.h"
+#include "TString.h"
+#include "TFile.h"
+#include "TTree.h"
+#include "TH1F.h"
+#include "TH2F.h"
+#include "TSystem.h"
+#include "TMath.h"
+#include "TVector3.h"
+#include "TROOT.h"
+#include "TApplication.h"
+#include "TFile.h"
+#include "TH1.h"
+#include "TH2.h"
+#include "TF1.h"
+#include "TFormula.h"
+#include "TProfile.h"
+#include "TNtuple.h"
+#include "TRandom.h"
+#include "TApplication.h"
+#include "TCanvas.h"
+#include "TDirectory.h"
+#include "TStyle.h"
+#include "TText.h"
+#include "TLatex.h"
+#include "TLine.h"
+#include "TPad.h"
+#include "TObjArray.h"
+#include "TTree.h"
+#include "TBranch.h"
+#include "TStopwatch.h"
+#include "TGraph.h"
+#include "TGraphErrors.h"
+#include "TLegend.h"
+#include "TFrame.h"
+#include "TF1.h"
+#include "TMinuit.h"
+
+#include "TBoard.h"
+#include "TModV830AC.h"
+#include "TModV785.h"
+#include "TModV785N.h"
+#include "TModV775.h"
+#include "TModV775N.h"
+#include "TModV792.h"
+
+
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <stdlib.h>
+#include <vector>
+#include <map>
+#include<cstdlib>
+
+using namespace std;
+
+
+
+int main(int argc,char **argv)
+{
+  int runnum;
+  if(argc==2)
+  {
+    runnum=atoi(argv[1]);
+  }
+  else 
+  {
+    cout<<"USAG: ./cali [runnum]"<<endl; return -1;
+  }
+  cout<<"runnum : "<<runnum<<endl;
+
+  //constant
+  float Pi=3.1415926;
+  TString raw_file;
+  raw_file="/home/daq/vme-single_201605/vmedata/2016gdr"; //input file name
+  TFile *f;
+  TString rootfile=Form("%s%04d.root",raw_file.Data(),runnum);
+  f=new TFile(rootfile.Data());
+  cout<<"The input root file is:  "<<rootfile<<endl;
+
+
+  TTree *tree;                   //get the tree in *.root 
+  //tree=(TTree*)gFile->Get("RawData");
+  tree=(TTree*) f->Get("RawData");
+  Int_t nentries;
+  nentries=(Int_t)tree->GetEntries();
+  cout<<"All the entry number: "<<nentries<<endl;
+
+  TBranch *bran103 = 0;
+  TBranch *bran104 = 0;
+  TBranch *bran106 = 0;
+  TBranch *bran108 = 0;
+  TBranch *bran110 = 0;
+  TBranch *bran112 = 0;
+  TBranch *bran114 = 0;
+  TBranch *bran116 = 0;
+  TBranch *bran118 = 0;
+  TBranch *bran120 = 0;
+
+  TModV830AC *vmod103 = new TModV830AC(); // 
+  TModV785 *vmod104 = new TModV785();   //Si1 60um  
+  TModV785 *vmod106 = new TModV785();   //Si2 60um
+  TModV785 *vmod108 = new TModV785();   //Si4 100um
+  TModV785 *vmod110 = new TModV785();   //QSD 300um
+  TModV785 *vmod112 = new TModV785();   //
+  TModV785N *vmod114 = new TModV785N();
+  TModV775N *vmod116 = new TModV775N();
+  TModV775 *vmod118 = new TModV775();
+  TModV775 *vmod120 = new TModV775();
+
+  tree->SetBranchAddress("Mod103_TModV830AC",&vmod103,&bran103);
+  tree->SetBranchAddress("Mod104_TModV785",&vmod104,&bran104);
+  tree->SetBranchAddress("Mod106_TModV785",&vmod106,&bran106);
+  tree->SetBranchAddress("Mod108_TModV785",&vmod108,&bran108);
+  tree->SetBranchAddress("Mod110_TModV785",&vmod110,&bran110);
+  tree->SetBranchAddress("Mod112_TModV785",&vmod112,&bran112);
+  tree->SetBranchAddress("Mod114_TModV785N",&vmod114,&bran114);
+  tree->SetBranchAddress("Mod116_TModV775N",&vmod116,&bran116);
+  tree->SetBranchAddress("Mod118_TModV775",&vmod118,&bran118);  
+  tree->SetBranchAddress("Mod120_TModV775",&vmod120,&bran120);  
+
+  //TH1F *h_si1_60_p1=new TH1F("si1_60_p1","si1_60_p1",4096,0,4096); 
+   TFile *rootfile1 = new TFile("../vmedata/gdr2.root","RECREATE");
+   //rootfile1->Delete("T;*");
+   //TTree *TT = new TTree("T","../vmedata/DTH.root");
+ 
+ 
+  //TCanvas *c1=new TCanvas("c1","c1",700,900);
+  TH2 *h1= new TH2D("h1","Tof dESi1",300, 0., 150., 200, 500, 3500.); 
+  TH2 *h2= new TH2D("h2","2D histo",16,0,16,16,0,16);
+  
+    int T1 = vmod116->chdata[0];
+	int T2 = vmod116->chdata[1];
+  for(int ievent =0; ievent<1; ievent++)//begin event loop
+  {
+    tree->GetEntry(ievent);
+        int Mch1=0,Mch2=0;
+        int Mch3=0,Mch4=0;
+        int Nch1=0,Nch2=0;
+    for(int i=0;i<16;i++)
+    {
+        
+        Mch1=vmod104->chdata[i];
+        cout<<vmod104->chdata[i]<<endl;
+        if(Mch1>Mch2)Nch1=i,Mch2=Mch1;
+        
+        Mch3=vmod104->chdata[i+16];
+        if(Mch3>Mch4)Nch2=i+16,Mch4=Mch3;
+        //cout<<vmod104->chdata[i]<<endl;
+        //Mch1=vmod106->chdata[i];
+        //if(Mch1>Mch2)Nch1=i,Mch2=Mch1;
+        
+        //Mch3=vmod106->chdata[i+16];
+        //if(Mch3>Mch4)Nch2=i+16,Mch4=Mch3;
+        
+        //vmod108->chdata[i];
+        //vmod108->chdata[i+16];
+    }
+    int t21 = T2-T1;
+    h1->Fill(t21,Mch2);
+    h2->Fill(Nch1,Nch2-16);
+
+    for(int i=0;i<16;i++)
+    {
+       //vmod110->chdata[i];
+    }
+  
+  }//end event loop
+  //c1->cd();
+  //h2->Draw("contz");
+  h1->Write();
+  h2->Write();
+  //c1->SaveAs("../vmedata/for_test-gdr-2.png");
+  
+}
