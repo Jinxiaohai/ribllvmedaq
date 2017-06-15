@@ -152,7 +152,9 @@ int main(int argc,char **argv)
       sprintf(hist_name_p,"si2_60_p%d", i);
       sprintf(hist_name_n,"si2_60_n%d", i);      
       sprintf(kedu_name_p, "kedu_si2_60_p%d", i);
-      sprintf(kedu_name_n, "kedu_si2_60_n%d", i);
+ 
+
+    sprintf(kedu_name_n, "kedu_si2_60_n%d", i);
       h_si2_60_p[i] = new TH1D(hist_name_p, hist_name_p, 4095, 1, 4095);
       h_si2_60_n[i] = new TH1D(hist_name_n, hist_name_n, 4095, 1, 4095);
       kedu_si2_60_p[i] = new TH1D(kedu_name_p, kedu_name_p, 4095, 1, 4095);
